@@ -32,7 +32,7 @@
       // 运行期也可用 Folio.ApiClient.setBackend('https://...') 覆盖（保存在 localStorage）。
       // 当前改为本地同域 PHP：手机/局域网访问时接口也走本机，不依赖外网 Worker。
       // 上线部署到静态主机时：改回 'https://bbtime.snawcap.cc.cd/'（或 setBackend 覆盖）。
-      backend: 'http://cy.steamspeed.cn/bbtime3/biliapi.php',
+      backend: './api/biliapi.php',
       backendTimeout: 20000, // 后端请求超时（毫秒）
       cacheTtl: 5 * 60 * 1000, // 内存缓存 5 分钟
       pageSize: 50,         // 收藏夹内容每页数量
