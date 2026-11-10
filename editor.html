@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>写简报 · 雪哔</title>
+<meta name="description" content="雪哔 BILITIME reaction 点播简报编辑器：为每支视频撰写概要、看点与注意，支持配图标注，生成文本、长图、Excel 与 PDF。">
+<meta name="keywords" content="雪哔,SnawCap,BILITIME,reaction,点播,简报,收藏夹,Excel,PDF">
+<meta name="author" content="山顶小雪球（SnawCap）">
+<meta name="theme-color" content="#518ff4">
+<link rel="icon" type="image/svg+xml" href="./assets/brand/favicon-brand.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="stylesheet" href="./css/theme.css">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/entry.css">
+<link rel="stylesheet" href="./css/editor.css">
+<link rel="stylesheet" href="./css/responsive.css">
+<script src="./vendor/html2canvas.min.js" defer></script>
+</head>
+<body data-page="editor">
+
+<!-- 顶部导航（点击品牌回主页） -->
+<header class="XNavBar scrolled" id="navBar">
+  <div class="container">
+    <div class="XNavBar-left">
+      <button class="nav-brand" id="nav-home" type="button">
+        <img src="./assets/brand/logo-brand.svg" alt="雪哔">
+        <span>雪哔</span>
+        <span class="nav-sub">BILITIME</span>
+      </button>
+    </div>
+    <div class="XNavBar-right">
+      <div class="nav-links">
+        <button class="link-btn" id="btn-about" type="button">关于</button>
+      </div>
+      <button class="XSwitch" id="theme-switch" type="button" role="switch" title="切换到深色模式" aria-checked="false">
+        <span class="check">
+          <span class="icon">
+            <span class="Xi-sun sun"></span>
+            <span class="Xi-moon moon"></span>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div class="DividingLine"></div>
+</header>
+
+<div class="ambient" aria-hidden="true">
+  <div class="ambient__aurora"><div class="ambient__layer"><div class="ambient__mv"><div class="ambient__drift"></div></div></div></div>
+  <div class="ambient__glow"></div>
+  <div class="ambient__noise"></div>
+</div>
+
+<!-- ═══════════ 编辑器 ═══════════ -->
+<section class="stage active" id="stage-editor">
+  <header class="topbar">
+    <button class="icon-btn ed-burger" id="btn-burger" data-ic="menu"></button>
+    <button class="icon-btn" id="btn-back" data-ic="chevL" title="返回收藏夹" aria-label="返回收藏夹"></button>
+    <div class="crumb" id="crumb"></div>
+    <div class="top-right">
+      <button class="icon-btn" id="btn-import" data-import="1" data-ic="upload" title="导入 PDF 简报" aria-label="导入 PDF 简报"></button>
+      <span class="prog-pill"><span data-ic="starF"></span><span id="chip-prog">0/0</span></span>
+      <div class="menu-wrap">
+        <button class="btn btn-primary btn-sm" id="btn-gen">生成成册</button>
+        <div class="dropdown" id="gen-menu">
+          <button data-out="text"><span data-ic="doc"></span>完整文本<span class="dd-arrow" data-ic="arrR"></span></button>
+          <button data-out="image"><span data-ic="layers"></span>介绍长图<span class="dd-arrow" data-ic="arrR"></span></button>
+          <button data-out="xlsx"><span data-ic="layers"></span>Excel 简报<span class="dd-arrow" data-ic="arrR"></span></button>
+          <button data-out="pdf"><span data-ic="doc"></span>PDF 简报<span class="dd-arrow" data-ic="arrR"></span></button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="ed-grid" id="ed-grid">
+    <aside class="ed-list" id="ed-list">
+      <div class="vl-head"><span>VIDEO INDEX</span><b id="vl-count"></b></div>
+      <div id="vl-items"></div>
+      <p class="vl-tip">TIP — 点击视频切换并撰写简报；<br>收藏夹页可随时统计分 P 时长<br>并按小时单价估价；右下角按钮<br>打开输出与进度面板。</p>
+    </aside>
+    <main class="ed-main">
+      <div class="doc" id="doc">
+        <div id="video-meta"></div>
+        <div class="toolbar" id="toolbar">
+          <button class="tb-btn" data-cmd="bold" title="加粗"><b>B</b></button>
+          <button class="tb-btn" data-cmd="italic" title="斜体"><i>I</i></button>
+          <div class="tb-color-wrap" id="tb-color-wrap">
+            <button class="tb-btn tb-color" id="tb-color" type="button" title="文字颜色" aria-label="文字颜色">
+              <span class="tb-color-a">A</span><i class="tb-color-bar" id="tb-color-bar"></i>
+            </button>
+            <div class="tb-palette" id="tb-palette">
+              <button type="button" class="tb-swatch" data-color="#518FF4" style="--c:#518FF4" title="雪哔蓝"></button>
+              <button type="button" class="tb-swatch" data-color="#22C3DD" style="--c:#22C3DD" title="青色"></button>
+              <button type="button" class="tb-swatch" data-color="#2F9E5F" style="--c:#2F9E5F" title="绿色"></button>
+              <button type="button" class="tb-swatch" data-color="#E58E2B" style="--c:#E58E2B" title="橙色"></button>
+              <button type="button" class="tb-swatch" data-color="#D94A64" style="--c:#D94A64" title="红色"></button>
+              <button type="button" class="tb-swatch" data-color="#7C5CD6" style="--c:#7C5CD6" title="紫色"></button>
+              <button type="button" class="tb-swatch" data-color="#8C8B93" style="--c:#8C8B93" title="灰色"></button>
+              <button type="button" class="tb-swatch tb-swatch-default" data-color="default" title="默认颜色">A</button>
+            </div>
+          </div>
+          <span class="tb-sep"></span>
+          <button class="tb-btn" data-block="blockquote" title="引用" data-ic="quote"></button>
+          <button class="tb-btn" data-hr="1" title="分割线" data-ic="hr"></button>
+          <span class="tb-sep"></span>
+          <button class="tb-btn" data-insimg="1" title="插入配图（整行 / 行内）" data-ic="image"></button>
+          <span class="tb-count" id="tb-count">0 字</span>
+        </div>
+        <div id="editor-area" contenteditable="true" spellcheck="false"
+             data-ph="为 reaction UP 主写这支视频的点播简报——&#10;【概要】讲了什么，节奏与结构如何；&#10;【看点】高能点与时间戳（如 04:32）；&#10;【注意】适合哪类 reaction、有无雷点。&#10;配图可整行排布或嵌在文字中间，支持粘贴与自由标注。"></div>
+      </div>
+    </main>
+    <aside class="ed-side">
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg width="84" height="84"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#518FF4"/><stop offset="1" stop-color="#7FB2F8"/></linearGradient></defs>
+            <circle class="ring-track" cx="42" cy="42" r="36"/>
+            <circle class="ring-fg" id="ring-fg" cx="42" cy="42" r="36" stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+          </svg>
+          <div class="ring-num"><b id="ring-done">0</b><span id="ring-total">/0</span></div>
+        </div>
+        <div class="ring-side">
+          <p>PROGRESS</p><h4>简报进度</h4>
+          <p class="rs-tip" id="ring-tip">还没开始，第一篇最难，也最好写。</p>
+        </div>
+      </div>
+      <p class="side-h">OUTPUT · 生成</p>
+      <button class="out-card" data-out="text"><span class="oc-no">01</span><span class="oc-icon" data-ic="doc"></span><span class="oc-txt"><b>完整文本</b><span>整册简报文本，一键复制</span></span><span class="oc-arrow" data-ic="arrR"></span></button>
+      <button class="out-card" data-out="image"><span class="oc-no">02</span><span class="oc-icon" data-ic="layers"></span><span class="oc-txt"><b>介绍长图</b><span>适合发微信、群聊与评论区</span></span><span class="oc-arrow" data-ic="arrR"></span></button>
+      <button class="out-card" data-out="xlsx"><span class="oc-no">03</span><span class="oc-icon" data-ic="layers"></span><span class="oc-txt"><b>Excel 简报</b><span>目录可跳转，适合在线表格阅读</span></span><span class="oc-arrow" data-ic="arrR"></span></button>
+      <button class="out-card" data-out="pdf"><span class="oc-no">04</span><span class="oc-icon" data-ic="doc"></span><span class="oc-txt"><b>PDF 简报</b><span>长图版式 + 目录书签，可回导</span></span><span class="oc-arrow" data-ic="arrR"></span></button>
+      <p class="side-h">IMPORT · 导入</p>
+      <button class="out-card" data-import="1"><span class="oc-no">05</span><span class="oc-icon" data-ic="upload"></span><span class="oc-txt"><b>导入 PDF</b><span>继续编辑之前导出的简报</span></span><span class="oc-arrow" data-ic="arrR"></span></button>
+      <p class="side-h">DOC · 成册设置</p>
+      <label class="switch-row"><span class="sw-label">允许他人转载成册内容<em>Excel / PDF 将显示转载声明</em></span><span class="sw"><input type="checkbox" checked data-share="allowRepost"><i></i></span></label>
+      <label class="switch-row"><span class="sw-label">在成册中显示 UP 主信息<em>关闭后仅保留视频标题</em></span><span class="sw"><input type="checkbox" checked data-share="showUp"><i></i></span></label>
+      <p class="side-note">LOCAL FIRST<br>· 简报草稿自动保存在本机<br>· 不上传任何内容<br>· Excel / PDF 在浏览器本地生成</p>
+    </aside>
+  </div>
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+  <button class="side-fab" id="side-fab" data-ic="sliders" title="输出与设置"></button>
+</section>
+
+<div id="modal-root"></div>
+<div class="toast-root" id="toast-root"></div>
+<input type="file" id="pdf-import" accept=".pdf,application/pdf" hidden>
+
+<noscript><p style="padding:24px;text-align:center">本工具需要启用 JavaScript 才能读取收藏夹。</p></noscript>
+
+<!-- jszip / pdf-lib 只在导出 Excel / PDF 时使用：defer 化让 620KB 不阻塞首屏与首交互；defer 保持彼此先后顺序，调用处已有存在性检查 -->
+<script src="./vendor/jszip.min.js" defer></script>
+<script src="./vendor/pdf-lib.min.js" defer></script>
+<script src="./js/config.js"></script>
+<script src="./js/utils.js"></script>
+<script src="./js/api-client.js"></script>
+<script src="./js/bilibili-api.js"></script>
+<script src="./js/store.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/editor.js"></script>
+<script src="./js/brief.js"></script>
+<script src="./js/xlsx.js"></script>
+<script src="./js/pdf.js"></script>
+<script src="./js/output.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+/* ═══════════ 设计系统（Demo_02 / Demo_03：白底 + 雪哔蓝 + 极光） ═══════════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#ffffff;
+  --panel:rgba(255,255,255,.66);
+  --panel-2:rgba(255,255,255,.94);
+  --glass-deep:rgba(255,255,255,.86);
+  /* 模态底色直接给不透明等效色 = 0.96×白 + 0.04×背后（mask+模糊页面）。
+     实测背后在模态范围内是 110–165 的灰，×0.04 后只剩 2 个色阶波动，
+     等效色稳定在 rgb(250,250,251)；这样既保持原观感，又完全去掉 alpha 合成。 */
+  --modal-bg:#fafafb;
+  --bar-bg:rgba(255,255,255,.72);
+  --rail:rgba(250,250,252,.6);
+  --drawer-bg:rgba(252,252,254,.98);
+  --stroke:rgba(60,60,67,.1);
+  --stroke-2:rgba(60,60,67,.18);
+  --ink:#3c3c43;
+  /* 弱化文字三级灰阶：层级关系不变，仅校准可读性（白底有效对比度 ≈ 4.9 / 3.5 / 2.3 : 1） */
+  --ink-2:rgba(60,60,67,.74);
+  --ink-3:rgba(60,60,67,.6);
+  --faint:rgba(60,60,67,.42);
+  --accent:#518FF4;
+  --accent-soft:rgba(81,143,244,.08);
+  --accent-br:rgba(81,143,244,.38);
+  --ring:rgba(81,143,244,.14);
+  --teal:#0d9488;
+  --amber:#c27803;
+  --ok:#15803d;
+  --grad:linear-gradient(115deg,#518FF4,#7FB2F8);
+  --glow:0 10px 30px -10px rgba(81,143,244,.38);
+  --hover-glow:0 18px 44px -16px rgba(81,143,244,.3);
+  --shadow-card:0 24px 60px -30px rgba(24,50,95,.22);
+  --mask:rgba(20,24,45,.42);
+  --dot:rgba(81,143,244,.14);
+  --stage-bg:rgba(81,143,244,.035);
+  --img-br:rgba(60,60,67,.14);
+  --img-ph:#f0f0f4;
+  --track:rgba(60,60,67,.14);
+  --hr:rgba(60,60,67,.22);
+  --quote-bg:rgba(81,143,244,.07);
+  --quote-ink:#2F5FAE;
+  --thumb:rgba(60,60,67,.22);
+  --chip-bg:rgba(255,255,255,.86);
+  /* 首页例图卡的等效不透明底色 = 0.78×白 + 0.22×背后（顶部是冷色光晕，越往下越白），
+     用渐变还原这个空间分布，观感与原来的半透明+模糊一致，但不再需要 backdrop-filter。 */
+  --mock-bg:linear-gradient(180deg,rgb(250,251,254) 0%,rgb(251,251,254) 45%,rgb(253,253,254) 100%);
+  --header-height:64px;
+  --max-width:1440px;
+  /* 背景氛围（Demo_02 / Demo_03 的极光条纹 + 冷色光晕） */
+  --ambient-stripes:repeating-linear-gradient(100deg,#fff 0%,#fff 7%,transparent 10%,transparent 12%,#fff 16%);
+  --ambient-rainbow:repeating-linear-gradient(100deg,#60a5fa 10%,#e879f9 16%,#5eead4 22%,#60a5fa 30%);
+  --ambient-opacity:.35;
+  --ambient-glow-1:rgba(96,165,250,.16);
+  --ambient-glow-2:rgba(232,121,249,.13);
+  --ambient-glow-3:rgba(94,234,212,.12);
+  --sun-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41'/%3E%3C/svg%3E");
+  --moon-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/%3E%3C/svg%3E");
+}
+body[data-theme="dark"]{
+  --bg:#1b1b1f;
+  --panel:rgba(255,255,255,.055);
+  --panel-2:rgba(255,255,255,.1);
+  --glass-deep:rgba(28,28,34,.9);
+  /* 暗色等效色 = 0.96×rgb(27,27,32) + 0.04×背后，实测恒为 rgb(27,27,32)（波动 <1 阶）。 */
+  --modal-bg:#1b1b20;
+  --bar-bg:rgba(20,20,24,.74);
+  --rail:rgba(255,255,255,.02);
+  --drawer-bg:#1e1e24;
+  --stroke:rgba(223,223,214,.1);
+  --stroke-2:rgba(223,223,214,.2);
+  --ink:#dfdfd6;
+  /* 暗底上同样的三级灰阶但整体提一档：弱化文字在深底的有效对比度 ≈ 7.2 / 5.1 / 4.1 : 1
+     （faint 用于序号/TIP 这类 10px 小字，太淡会糊，提到 4:1 以上） */
+  --ink-2:rgba(223,223,214,.72);
+  --ink-3:rgba(223,223,214,.58);
+  --faint:rgba(223,223,214,.5);
+  --accent:#9DC4FF;
+  --accent-soft:rgba(157,196,255,.12);
+  --accent-br:rgba(157,196,255,.45);
+  --ring:rgba(157,196,255,.16);
+  --teal:#2dd4bf;
+  --amber:#fbbf24;
+  --ok:#4ade80;
+  --grad:linear-gradient(115deg,#3F7FE8,#8FC0FF);
+  --glow:0 12px 36px -10px rgba(81,143,244,.55);
+  --hover-glow:0 20px 48px -16px rgba(81,143,244,.4);
+  --shadow-card:0 30px 70px -28px rgba(0,0,0,.7);
+  --mask:rgba(5,6,12,.66);
+  --dot:rgba(255,255,255,.07);
+  --stage-bg:rgba(255,255,255,.025);
+  --img-br:rgba(255,255,255,.14);
+  --img-ph:#26262e;
+  --track:rgba(255,255,255,.12);
+  --hr:rgba(255,255,255,.2);
+  --quote-bg:rgba(157,196,255,.1);
+  --quote-ink:#CFE2FF;
+  --thumb:rgba(255,255,255,.18);
+  --chip-bg:rgba(28,28,34,.84);
+  /* 暗色等效底色 = 0.78×rgb(28,28,34) + 0.22×背后；顶部透出的冷色光晕最强，按实测四段取值。 */
+  --mock-bg:linear-gradient(180deg,rgb(37,37,46) 0%,rgb(35,35,43) 25%,rgb(32,32,38) 55%,rgb(28,28,34) 100%);
+  --ambient-opacity:.5;
+  --ambient-glow-1:rgba(96,165,250,.18);
+  --ambient-glow-2:rgba(232,121,249,.16);
+  --ambient-glow-3:rgba(94,234,212,.12);
+}
+::selection{background:rgba(81,143,244,.25);color:inherit}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--thumb);border-radius:99px;border:2px solid var(--bg)}
+svg{display:block}
+.mono{font-family:'JetBrains Mono','SF Mono',Menlo,monospace}
+button{font-family:inherit;touch-action:manipulation}
+.btn,a,.seg button,.out-card,.v-item,.folder-card,.tb-btn,.ab-group button,.media-actions button,.inline-actions button,.icon-btn,.fc-stat,.fc-edit{touch-action:manipulation}
+img{-webkit-user-drag:none}
+/* ═══════════ 暗色模式文字清晰度 ═══════════
+   深底上细体（300）小字会发虚：正文与次级信息在暗色主题统一提到 400。
+   只影响暗色主题；等宽标签/标题/字重 500+ 不在列；布局不因字重改变（CJK 与等宽字体各字重等宽）。
+   导出成品 .folio 有自己的固定版式，figcaption 明确保持 300 不受影响。 */
+body[data-theme="dark"] .lead,
+body[data-theme="dark"] .uid-help li,
+body[data-theme="dark"] .uid-field input::placeholder,
+body[data-theme="dark"] .st-note,
+body[data-theme="dark"] .st-sub,
+body[data-theme="dark"] .st-price.empty,
+body[data-theme="dark"] .state-card p,
+body[data-theme="dark"] .loading-panel p,
+body[data-theme="dark"] .empty-panel p,
+body[data-theme="dark"] .m-head p,
+body[data-theme="dark"] .hint,
+body[data-theme="dark"] .oc-txt span,
+body[data-theme="dark"] .rs-tip,
+body[data-theme="dark"] .sw-label em,
+body[data-theme="dark"] .pick-mode-tip,
+body[data-theme="dark"] .brief-points,
+body[data-theme="dark"] .brief-error,
+body[data-theme="dark"] .tx-body,
+body[data-theme="dark"] .vh-desc p,
+body[data-theme="dark"] .media-block figcaption,
+body[data-theme="dark"] #editor-area,
+body[data-theme="dark"] #editor-area[data-ph]:empty::before,
+body[data-theme="dark"] #editor-area.blank::before{font-weight:400}
+body[data-theme="dark"] .folio .media-block figcaption{font-weight:300}
+
+/* ═══════════ 主题切换瞬间完成 ═══════════
+   实测：切换时的全局颜色过渡会引发逐帧重绘风暴（2000 行编辑器上 ≈500ms 长任务、7 帧超 33ms）；
+   在切换的帧里禁用过渡后长任务归零（最差帧 11ms）。只在切换的 1-2 帧生效，
+   日常 hover / 按压 / 聚焦等过渡完全不受影响。 */
+html.theme-switching *,html.theme-switching *::before,html.theme-switching *::after{transition:none!important}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}

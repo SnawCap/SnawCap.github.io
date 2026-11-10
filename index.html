@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>雪哔 · 收藏夹计算统计与 reaction 点播</title>
+<meta name="description" content="雪哔（SnawCap / BILITIME）：计算、统计、管理 B 站收藏夹，撰写 reaction 点播简报，并生成文本、长图、Excel 与 PDF。">
+<meta name="keywords" content="雪哔,SnawCap,BILITIME,B站收藏夹,reaction,点播,看片简报,时长统计">
+<meta name="author" content="山顶小雪球（SnawCap）">
+<meta name="theme-color" content="#518ff4">
+<link rel="icon" type="image/svg+xml" href="./assets/brand/favicon-brand.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 字体异步加载：避免外网字体阻塞首屏与脚本执行；中文优先使用本机 HarmonyOS Sans SC -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="stylesheet" href="./css/theme.css">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/entry.css">
+<link rel="stylesheet" href="./css/editor.css">
+<link rel="stylesheet" href="./css/responsive.css">
+</head>
+<body data-page="home">
+
+<!-- 顶部导航（Demo_03 结构：固定、毛玻璃、分隔线、明暗开关） -->
+<header class="XNavBar scrolled" id="navBar">
+  <div class="container">
+    <div class="XNavBar-left">
+      <button class="nav-brand" id="nav-home" type="button">
+        <img src="./assets/brand/logo-brand.svg" alt="雪哔">
+        <span>雪哔</span>
+        <span class="nav-sub">BILITIME</span>
+      </button>
+    </div>
+    <div class="XNavBar-right">
+      <div class="nav-links">
+        <button class="link-btn" id="btn-about" type="button">关于</button>
+      </div>
+      <button class="XSwitch" id="theme-switch" type="button" role="switch" title="切换到深色模式" aria-checked="false">
+        <span class="check">
+          <span class="icon">
+            <span class="Xi-sun sun"></span>
+            <span class="Xi-moon moon"></span>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <div class="DividingLine"></div>
+</header>
+
+<!-- 背景氛围层：Demo_03 极光条纹 + Demo_02 冷色光晕 -->
+<div class="ambient" aria-hidden="true">
+  <div class="ambient__aurora"><div class="ambient__layer"><div class="ambient__mv"><div class="ambient__drift"></div></div></div></div>
+  <div class="ambient__glow"></div>
+  <div class="ambient__noise"></div>
+</div>
+
+<!-- ═══════════ 主页 · 入口 ═══════════ -->
+<section class="stage active" id="stage-entry">
+  <div class="hero container">
+    <div class="hero-copy">
+      <div class="pill-tag"><span class="dot"></span>BILITIME · REACTION 点播工具</div>
+      <h1>哔哩哔哩<br>收藏夹<em>计算器</em>。</h1>
+      <p class="lead">哔哩哔哩用户收藏夹工具 - 时长统计、计费预估、详解生成</p>
+      <div class="uid-row">
+        <div class="uid-field"><span data-ic="user"></span><input id="uid-input" placeholder="输入你的哔哩哔哩 UID" inputmode="numeric" autocomplete="off" aria-label="哔哩哔哩 UID"></div>
+        <button class="btn btn-primary" id="btn-query">打开我的收藏夹</button>
+      </div>
+      <div class="uid-help">
+        <p class="uh-title"><i></i>如何获取 UID？</p>
+        <ul>
+          <li>B 站「隐私设置」里打开「公开我的收藏」；要查询的收藏夹也需公开。</li>
+          <li>UID 在个人主页地址中，如 <a href="https://space.bilibili.com/8047632" target="_blank" rel="noopener noreferrer">space.bilibili.com/8047632</a> 里的 <code>8047632</code>。</li>
+        </ul>
+      </div>
+      <button class="resume-link" id="btn-resume" type="button" hidden></button>
+      <p class="hint-line"><span id="data-source-hint">Cloudflare Worker · 读取公开收藏夹（无需登录）</span></p>
+      <div class="feat-strip">
+        <span><span data-ic="clock"></span>收藏夹计算与统计</span><i>/</i>
+        <span><span data-ic="doc"></span>reaction 点播简报</span><i>/</i>
+        <span><span data-ic="pen"></span>配图自由标注</span><i>/</i>
+        <span><span data-ic="doc"></span>文本 · 长图 · Excel · PDF</span>
+      </div>
+    </div>
+    <div class="hero-visual" id="hero-visual">
+      <div class="tilt" id="tilt">
+        <div class="mock">
+          <div class="mock-head">
+            <span class="mock-logo"></span>
+            <div class="mh-txt"><b>本周 reaction 素材 · 待写简报</b><span>10 VIDEOS · CURATED BY SNAWCAP</span></div>
+            <span class="mh-chip">3/10</span>
+          </div>
+          <div class="mock-row">
+            <img src="https://picsum.photos/seed/folio-vlog-3/140/90.jpg" alt="">
+            <div class="mr-txt"><b>我用一年时间，记录了窗外的同一棵树</b><span>概要 / 看点 03:12 / 注意事项…</span></div>
+            <span class="mr-done" data-ic="check"></span>
+          </div>
+          <div class="mock-row">
+            <img src="https://picsum.photos/seed/folio-vlog-7/140/90.jpg" alt="">
+            <div class="mr-txt"><b>辞职后，我在小镇开了一家旧书店</b><span>概要 / 看点 10:55 / 注意事项…</span></div>
+            <span class="mr-done" data-ic="check"></span>
+          </div>
+          <div class="mock-media">
+            <img src="https://picsum.photos/seed/folio-window/640/340.jpg" alt="">
+            <svg class="doodle" viewBox="0 0 400 200" preserveAspectRatio="none">
+              <ellipse class="dd1" cx="128" cy="76" rx="54" ry="31" fill="none" stroke-width="2.6" stroke-linecap="round" pathLength="100"/>
+              <path class="dd2" d="M186 74 C 226 72 252 88 274 116" fill="none" stroke-width="2.6" stroke-linecap="round" pathLength="100"/>
+              <path d="M274 116 l-15 -2 M274 116 l-3.5 -13.5" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+              <text x="196" y="150" font-size="14" font-weight="600">看这里，第 42 天</text>
+            </svg>
+          </div>
+          <div class="mock-foot"><span class="mf-btn primary">时长统计 2:51:07</span><span class="mf-btn">生成简报</span></div>
+        </div>
+      </div>
+      <div class="hv-chip c1"><span data-ic="clock"></span>仅第一P 2:51:07</div>
+      <div class="hv-chip c2"><span data-ic="pen"></span>画笔 / 箭头 / 文字标注</div>
+      <div class="hv-chip c3"><span data-ic="doc"></span>PDF 简报可回导继续编辑</div>
+    </div>
+  </div>
+  <p class="entry-foot" id="entry-mode-foot">SNAWCAP · 山顶小雪球 · BILITIME · 公开收藏夹数据由 Cloudflare Worker 代理读取</p>
+</section>
+
+<div id="modal-root"></div>
+<div class="toast-root" id="toast-root"></div>
+
+<noscript><p style="padding:24px;text-align:center">本工具需要启用 JavaScript 才能读取收藏夹。</p></noscript>
+
+<script src="./js/config.js"></script>
+<script src="./js/utils.js"></script>
+<script src="./js/api-client.js"></script>
+<script src="./js/bilibili-api.js"></script>
+<script src="./js/store.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

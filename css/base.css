@@ -1,0 +1,94 @@
+html{scroll-behavior:smooth}
+/* 字体栈：西文优先 Inter（网络字体，跨平台一致），中文按系统最优顺序回退。
+   不再用 -webkit-font-smoothing:antialiased：它只影响 macOS/iOS，会放弃次像素抗锯齿、
+   让浅色细字发虚；交给系统默认（Windows/Android 本来就忽略该属性）。
+   中文补 Noto Sans SC / Noto Sans CJK SC 作为安卓兜底，避免回退到老旧的 Droid Sans Fallback。 */
+body{font-family:'HarmonyOS Sans SC','Inter',-apple-system,'PingFang SC','Noto Sans SC','Noto Sans CJK SC','Source Han Sans SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-top:var(--header-height);transition:background .4s,color .4s;overflow-x:hidden}
+body.modal-open{overflow:hidden}
+
+/* ═══════════ 背景氛围层（Demo_03 极光条纹 + Demo_02 冷色光晕） ═══════════ */
+/* 极光层随文档滚动（absolute，对齐 Demo_02 的 hero 局部做法）：滚过首屏后极光离开视口，
+   浏览器直接跳过它的绘制，等同把「动画 × 毛玻璃」的每帧成本归零。
+   glow / noise 是静态的，保持 fixed 全屏，观感与之前一致。 */
+.ambient{position:absolute;top:0;left:0;right:0;bottom:0;z-index:0;overflow:hidden;pointer-events:none}
+.ambient__aurora{position:absolute;top:-4rem;left:0;width:100%;height:60vh;overflow:hidden;opacity:var(--ambient-opacity);transition:opacity .5s}
+.ambient__layer{position:absolute;inset:0;contain:strict;contain-intrinsic-size:100vw 40vh;background-image:var(--ambient-stripes),var(--ambient-rainbow);background-size:300%,200%;background-position:50% 50%,50% 50%;transform:translateZ(0);-webkit-transform:translateZ(0);perspective:1000px;-webkit-perspective:1000;backface-visibility:hidden;-webkit-backface-visibility:hidden;filter:invert(100%);-webkit-mask-image:radial-gradient(ellipse at 100% 0%,black 40%,transparent 70%);mask-image:radial-gradient(ellipse at 100% 0%,black 40%,transparent 70%);opacity:.6;pointer-events:none}
+/* 位移动画层：与旧版 ::after 渲染同构（静态彩虹铺底 + 白条纹位移，difference 混合对下层静态渐变），
+   但从 background-position（逐帧重绘整片背景 + 触发上方所有毛玻璃重算）改为 transform 合成器动画。
+   尺寸：条带元素 300vw、tile 200vw、起点 -50vw、translateX 0→-200vw（恰好 1 个 tile），
+   速度 = 200vw/60s = 3.33vw/s，与旧版 300vw/90s 完全一致，起始相位也一致（tile 原点 -50vw）；
+   60s 处无缝衔接，顺带消除了旧版每 90s 的 0.5 tile 跳变。
+   节奏：steps(900,end) = 15Hz 更新（每步 0.87px@390 宽，手机 dpr3 ≈ 2.6 物理像素），
+   让压在上的毛玻璃只按 15 次/秒重算而不是 60 次/秒（省 3/4）；肉眼仍是连续缓慢流动。
+   注：4Hz(3.25px/步) 会看出明显跳动；20Hz=0.65px、30Hz=0.43px 是更保守的档位。 */
+.ambient__mv{position:absolute;inset:0;background-image:var(--ambient-rainbow);background-size:100% 100%;background-position:50% 50%;mix-blend-mode:difference;pointer-events:none}
+.ambient__drift{position:absolute;top:0;left:0;width:300vw;height:100%;background-image:var(--ambient-stripes);background-size:200vw 100%;background-position:-50vw 50%;animation:ambient-drift 60s steps(900,end) infinite;pointer-events:none}
+@keyframes ambient-drift{from{transform:translateX(0)}to{transform:translateX(-200vw)}}
+/* 光晕与噪点是静态的（不参与动画），保持 fixed 全屏即可：不随滚动移动，也不会因动画重绘。 */
+.ambient__glow{position:fixed;inset:0;background:radial-gradient(900px 520px at 6% 0%,var(--ambient-glow-1),transparent 65%),radial-gradient(820px 540px at 94% 10%,var(--ambient-glow-2),transparent 64%),radial-gradient(760px 520px at 48% 102%,var(--ambient-glow-3),transparent 70%);opacity:.9}
+.ambient__noise{position:fixed;inset:0;opacity:.6;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.028 0"/></filter><rect width="180" height="180" filter="url(%23n)"/></svg>')}
+body[data-theme="dark"] .ambient__noise{opacity:.55;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0"/></filter><rect width="180" height="180" filter="url(%23n)"/></svg>')}
+
+/* ═══════════ 顶部导航（Demo_03） ═══════════ */
+.XNavBar{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--header-height);background-color:transparent;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:background-color .25s,border-color .25s}
+.XNavBar .container{display:flex;align-items:center;justify-content:space-between;height:100%}
+.XNavBar.scrolled{background-color:rgba(255,255,255,.13)}
+body[data-theme="dark"] .XNavBar.scrolled{background-color:rgba(27,27,31,.32)}
+.XNavBar .DividingLine{width:100%;height:1px;background-color:rgba(60,60,67,.12);transition:background-color .5s}
+body[data-theme="dark"] .XNavBar .DividingLine{background-color:rgba(223,223,214,.14)}
+.XNavBar-left{display:flex;align-items:center;min-width:0}
+.XNavBar-right{display:flex;align-items:center;gap:8px}
+.nav-brand{display:flex;align-items:center;gap:10px;height:var(--header-height);padding:0;border:none;background:none;cursor:pointer;font:600 16px 'HarmonyOS Sans SC','Inter',sans-serif;color:var(--ink);transition:opacity .2s}
+.nav-brand:hover{opacity:.72}
+.nav-brand img{width:24px;height:24px;border-radius:6px}
+.nav-brand .nav-sub{font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:.24em;color:var(--ink-3);margin-left:2px;margin-top:3px}
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-links .link-btn{padding:8px 11px}
+
+/* Demo_03 明暗开关 */
+.XSwitch{position:relative;border-radius:11px;display:block;width:40px;height:22px;flex-shrink:0;border:1px solid var(--stroke-2);background-color:rgba(142,150,170,.18);transition:background-color .25s,border-color .25s}
+.XSwitch:hover{border-color:var(--accent)}
+.XSwitch .check{position:absolute;top:1px;left:1px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.14);transition:transform .25s;opacity:.92}
+body[data-theme="dark"] .XSwitch .check{background:#000;transform:translateX(18px)}
+.XSwitch .icon{position:absolute;top:3px;left:3px;width:12px;height:12px;color:var(--ink-2)}
+body[data-theme="dark"] .XSwitch .icon{color:var(--ink)}
+.Xi-sun,.Xi-moon{width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .25s}
+.Xi-sun{background-color:currentColor;-webkit-mask:var(--sun-icon) no-repeat;mask:var(--sun-icon) no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;opacity:1}
+.Xi-moon{background-color:currentColor;-webkit-mask:var(--moon-icon) no-repeat;mask:var(--moon-icon) no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%;opacity:0}
+body[data-theme="dark"] .Xi-sun{opacity:0}
+body[data-theme="dark"] .Xi-moon{opacity:1}
+
+/* ═══════════ 阶段 ═══════════ */
+.stage{display:none;position:relative;z-index:1}
+.stage.active{display:block;animation:stageIn .55s cubic-bezier(.22,1,.36,1) both}
+#stage-editor.active{display:flex;flex-direction:column;height:calc(100vh - var(--header-height));height:calc(100dvh - var(--header-height));overflow:hidden}
+@keyframes stageIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.container{max-width:1180px;margin:0 auto;padding:0 40px}
+
+/* ═══════════ 按钮 ═══════════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:12px;border:1px solid transparent;font:600 14.5px/1 'HarmonyOS Sans SC','Inter',sans-serif;color:var(--ink);cursor:pointer;transition:.22s cubic-bezier(.22,1,.36,1);user-select:none;white-space:nowrap}
+.btn svg{width:16px;height:16px}
+.btn-primary{position:relative;overflow:hidden;background:var(--grad);color:#fff;box-shadow:var(--glow)}
+.btn-primary::after{content:'';position:absolute;top:0;left:-70%;width:38%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);transition:left .65s ease}
+.btn-primary:hover{transform:translateY(-1px);filter:saturate(1.08);box-shadow:var(--glow)}
+.btn-primary:hover::after{left:130%}
+.btn-primary:active{transform:translateY(0) scale(.98)}
+.btn-primary:disabled{opacity:.6;pointer-events:none}
+.btn-ghost{background:var(--panel);border-color:var(--stroke-2);color:var(--ink)}
+.btn-ghost:hover{background:var(--panel-2);transform:translateY(-1px)}
+.btn-sm{padding:9px 15px;font-size:13.5px;border-radius:10px}
+.icon-btn{width:38px;height:38px;border-radius:11px;background:var(--panel);border:1px solid var(--stroke-2);color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.18s;flex-shrink:0}
+.icon-btn:hover{background:var(--panel-2);color:var(--ink);transform:translateY(-1px)}
+.icon-btn svg{width:17px;height:17px}
+.link-btn{background:none;border:none;cursor:pointer;font:500 13.5px 'HarmonyOS Sans SC','Inter',sans-serif;color:var(--ink-2);padding:8px 10px;border-radius:9px;transition:.15s}
+.link-btn:hover{color:var(--ink);background:var(--panel)}
+/* ═══════════ Toast ═══════════ */
+.toast-root{position:fixed;right:24px;bottom:24px;z-index:1200;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.toast{display:flex;align-items:center;gap:10px;background:var(--glass-deep);backdrop-filter:blur(18px);border:1px solid var(--stroke-2);color:var(--ink);border-radius:14px;padding:13px 18px;font-size:13.5px;max-width:340px;line-height:1.55;box-shadow:var(--shadow-card);animation:tIn .32s cubic-bezier(.2,1.3,.4,1)}
+.toast svg{width:16px;height:16px;flex-shrink:0;color:var(--ok)}
+.toast.warn svg{color:var(--amber)}
+.toast.out{opacity:0;transform:translateY(8px);transition:.3s}
+@keyframes tIn{from{opacity:0;transform:translateY(14px) scale(.96)}}
+.spin{width:15px;height:15px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
